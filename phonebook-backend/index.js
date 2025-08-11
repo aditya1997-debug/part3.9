@@ -14,6 +14,7 @@ morgan.token('body', (req) => {
     
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :body'));
 app.use(express.json());
+app.use(express.static('dist'))
 
 let phonebook = [
     { 
@@ -42,9 +43,6 @@ app.listen(PORT, () => {
     console.log("server is running on port 3001")
 });
 
-app.get('/', (request, response) => {
-    response.send('Hello World')
-});
 
 app.get('/api/info', (req, res) => {
   console.log("inside info api")
@@ -121,7 +119,6 @@ app.post('/api/persons', (request, response) => {
             error: `name must be unique, ${name} already exits in phonebook`
         })
     }
-
 
     const person = { ...request.body, id: generateId()}
     phonebook.push(person)
