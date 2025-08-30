@@ -4,7 +4,7 @@ import PersonForm from './components/personForm';
 import Filter from './components/filter';
 import Notification from './components/Notification';
 import Del from './components/delete_button';
-import { getAll, create, delete_person } from './services/persons';
+import { getAll, create, delete_person, update_person } from './services/persons';
 import axios from 'axios';
 
 const App = () => {
@@ -32,6 +32,7 @@ const App = () => {
   const handleNumberChange = (event) => setNumber(event.target.value);
   const handleSearch = (event) => setSearchTerm(event.target.value);
 
+  console.log("Persons", persons)
   const filteredPersons = persons.filter(person =>
     person.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -62,10 +63,10 @@ const App = () => {
         }
 
         const updated_person = { ...persons[person_exists], number: newNumber };
-
-        axios
-          .put(`http://localhost:3001/persons/${persons[person_exists].id}`, updated_person)
-          .then(response => {
+        console.log("updated_person", updated_person)
+        update_person(`${persons[person_exists].id}`, updated_person)
+          .then(data => {
+            console.log("response ==>", data)
             setNotificationMessage({
               message: `${newName}'s number has been updated`,
               flag: 'notification'
@@ -74,11 +75,13 @@ const App = () => {
               setNotificationMessage({ message: null, flag: null });
             }, 5000);
 
-            setPersons(persons.map(person =>
-              person.id === response.data.id ? response.data : person
+            console.log("====>",data.id)
+            setPersons(persons.map(person => 
+              person.id === data.id ? data : person
             ));
           })
           .catch(error => {
+            console.log("error",error)
             setNotificationMessage({
               message: `Information of ${newName} has already been deleted from server`,
               flag: 'error'
@@ -103,6 +106,7 @@ const App = () => {
 
     create(personObject)
       .then(data => {
+        console.log('==================>', data)
         setNotificationMessage({
           message: `Added ${newName}`,
           flag: 'notification'
@@ -116,6 +120,7 @@ const App = () => {
         setNumber('');
       })
       .catch(error => {
+        console.log("error =======>", error)
         setNotificationMessage({
           message: `Failed to save person: ${error.message}`,
           flag: 'error'

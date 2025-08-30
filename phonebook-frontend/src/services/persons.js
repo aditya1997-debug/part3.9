@@ -22,4 +22,11 @@ const delete_person = (id) => {
     return response.then(response => response.data)
 }
 
-export { getAll, create, delete_person }
+
+const update_person = (id, data) => {
+    console.log("Function",id)
+    const response = axios.put(`${base_url}/${id}`, data)
+    return response.then(response => response.data)
+}
+
+export { getAll, create, delete_person, update_person }

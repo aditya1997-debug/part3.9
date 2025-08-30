@@ -8,7 +8,6 @@ const Phonebook = require('./models/phonebook');
 const PORT = process.env.PORT;
 
 
-
 morgan.token('body', (req) => {
   if (req.method === 'POST') {
     return JSON.stringify(req.body);
@@ -16,10 +15,13 @@ morgan.token('body', (req) => {
   return '';
 });
 
-app.use(cors())
-app.use(morgan(':method :url :status :res[content-length] - :response-time ms :body'));
+app.use(cors()); 
+app.use(morgan(':method :url :status :res[content-length] - :response-time ms :body')); // 2. log everything
 app.use(express.json());
 app.use(express.static('dist'));
+
+
+
 
 let phonebook = []
 
@@ -28,7 +30,7 @@ app.listen(PORT, () => {
 });
 
 
-app.get('/api/info', (req, res) => {
+app.get('/info', (req, res) => {
   console.log("inside info api")
   const count = phonebook.length;
 
@@ -45,12 +47,15 @@ app.get('/api/info', (req, res) => {
     hour12: false
   });
 
-  const info = `
-    <p>Phonebook has info for ${count} people</p>
-    <p>${indiaDate}</p>
-  `;
+    Phonebook.countDocuments().then(count => {
+        const info = `
+        <p>Phonebook has info for ${count} people</p>
+        <p>${indiaDate}</p>
+    `;
 
-  res.send(info);
+    res.send(info);
+  })
+
 });
 
 app.get('/api/persons', (request, response) => {
@@ -60,21 +65,28 @@ app.get('/api/persons', (request, response) => {
     })
 });
 
-app.get('/api/persons/:id', (request, response) => {
+app.get('/api/persons/:id', (request, response, next) => {
   const id = request.params.id;
-  const person = phonebook.find(person => person.id === id);
-  if (person) {
-    response.json(person);
-  } else {
-    response.statusMessage = `Person Not Found`;
-    return response.status(404).end();
-  }
+  Phonebook.findById(id)
+  .then(person => {
+      if (person) {
+      response.json(person);
+    } else {
+      response.statusMessage = `Person Not Found`;
+      return response.status(404).end();
+    }
+  })
+  .catch(error => next(error))
+  
 });
 
-app.delete('/api/persons/:id', (request, response) => {
+app.delete('/api/persons/:id', (request, response, next) => {
     const id = request.params.id;
-    phonebook = phonebook.filter(person => person.id !== id);
-    response.status(204).end()
+    phonebook = Phonebook.findByIdAndDelete(id)
+                .then(result => {
+                  response.status(204).end()
+                })
+                .catch(error => next(error))
 });
 
 const generateId = () => {
@@ -100,13 +112,6 @@ app.post('/api/persons', (request, response) => {
         })
     }
 
-    const name_exits = phonebook.find(x => x.name.toLowerCase() === name.toLowerCase());
-    if(name_exits){
-        return response.status(400).json({
-            error: `name must be unique, ${name} already exits in phonebook`
-        })
-    }
-
     console.log("payload", request.body)
 
     console.log(name, number)
@@ -123,3 +128,48 @@ app.post('/api/persons', (request, response) => {
       response.json(data)
     })
 });
+
+app.put('/api/persons/:id', (request, response, next) => {
+  console.log("API hit")
+  const id = request.params.id;
+  const {number} = request.body;
+
+  Phonebook.findById(id)
+           .then(result => {
+            if (result) {
+              result.number = number
+              result.save().then(result => {
+                return response.json(result)
+              })
+            }
+            else {
+              return response.status(404).end()
+            }
+          })
+          .catch(error => next(error))
+          
+});
+
+
+
+
+
+// ---------------------------------------------------- * ------------------------------------- //
+
+// Middleware for unknown end point
+const unknownEndpoint = (request, response) => {
+  response.status(404).send({ error: 'unknown endpoint' })
+}
+app.use(unknownEndpoint)
+
+// Error Handler Middleware
+const errorHandler = (error, request, response, next) => {
+  console.error(error.message)
+
+  if (error.name === 'CastError') {
+    return response.status(400).send({ error: 'malformatted id' })
+  } 
+
+  next(error)
+}
+app.use(errorHandler)
