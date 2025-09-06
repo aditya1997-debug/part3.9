@@ -96,7 +96,7 @@ const generateId = () => {
   return String(maxId + 1)
 }
 
-app.post('/api/persons', (request, response) => {
+app.post('/api/persons', (request, response, next) => {
     const number = request.body.number;
     const name = request.body.name;
 
@@ -127,6 +127,7 @@ app.post('/api/persons', (request, response) => {
     .then(data => {
       response.json(data)
     })
+    .catch(error => next(error))
 });
 
 app.put('/api/persons/:id', (request, response, next) => {
@@ -134,19 +135,15 @@ app.put('/api/persons/:id', (request, response, next) => {
   const id = request.params.id;
   const {number} = request.body;
 
-  Phonebook.findById(id)
-           .then(result => {
-            if (result) {
-              result.number = number
-              result.save().then(result => {
-                return response.json(result)
-              })
-            }
-            else {
-              return response.status(404).end()
-            }
-          })
-          .catch(error => next(error))
+  Phonebook.findOneAndUpdate({_id : id}, {number: number}, { runValidators: true, new: true })
+            .then(result => {
+              if (result) {
+                return response.status(200).json(result)
+              }
+              else {
+                response.status(204).end()
+              }
+            }).catch(err => next(err))
           
 });
 
@@ -168,7 +165,10 @@ const errorHandler = (error, request, response, next) => {
 
   if (error.name === 'CastError') {
     return response.status(400).send({ error: 'malformatted id' })
-  } 
+  } else if (error.name === 'ValidationError') {
+    console.log("=============>",error.message)
+    return response.status(400).json({ error: error.message })
+  }
 
   next(error)
 }

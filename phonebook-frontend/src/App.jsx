@@ -32,7 +32,7 @@ const App = () => {
   const handleNumberChange = (event) => setNumber(event.target.value);
   const handleSearch = (event) => setSearchTerm(event.target.value);
 
-  console.log("Persons", persons)
+  // console.log("Persons", persons)
   const filteredPersons = persons.filter(person =>
     person.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -63,10 +63,10 @@ const App = () => {
         }
 
         const updated_person = { ...persons[person_exists], number: newNumber };
-        console.log("updated_person", updated_person)
+        // console.log("updated_person", updated_person)
         update_person(`${persons[person_exists].id}`, updated_person)
           .then(data => {
-            console.log("response ==>", data)
+            // console.log("response ==>", data)
             setNotificationMessage({
               message: `${newName}'s number has been updated`,
               flag: 'notification'
@@ -75,15 +75,15 @@ const App = () => {
               setNotificationMessage({ message: null, flag: null });
             }, 5000);
 
-            console.log("====>",data.id)
+            // console.log("====>",data.id)
             setPersons(persons.map(person => 
               person.id === data.id ? data : person
             ));
           })
           .catch(error => {
-            console.log("error",error)
+            // console.log("error",error.response)
             setNotificationMessage({
-              message: `Information of ${newName} has already been deleted from server`,
+              message: `${error.response.data.error}`,
               flag: 'error'
             });
             setTimeout(() => {
@@ -106,7 +106,7 @@ const App = () => {
 
     create(personObject)
       .then(data => {
-        console.log('==================>', data)
+        // console.log('=======data===========>', data)
         setNotificationMessage({
           message: `Added ${newName}`,
           flag: 'notification'
@@ -120,9 +120,9 @@ const App = () => {
         setNumber('');
       })
       .catch(error => {
-        console.log("error =======>", error)
+        // console.log("error =======>", error.response.data.error)
         setNotificationMessage({
-          message: `Failed to save person: ${error.message}`,
+          message: `${error.response.data.error}`,
           flag: 'error'
         });
         setTimeout(() => {
