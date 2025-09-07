@@ -5,7 +5,6 @@ import Filter from './components/filter';
 import Notification from './components/Notification';
 import Del from './components/delete_button';
 import { getAll, create, delete_person, update_person } from './services/persons';
-import axios from 'axios';
 
 const App = () => {
   const [persons, setPersons] = useState([]);
@@ -17,7 +16,7 @@ const App = () => {
   useEffect(() => {
     getAll()
       .then(data => setPersons(data))
-      .catch(error => {
+      .catch(() => {
         setNotificationMessage({
           message: 'Failed to fetch contacts.',
           flag: 'error'

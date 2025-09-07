@@ -7,7 +7,7 @@ const url = process.env.MONGODB_URI
 
 console.log('connecting to', url)
 mongoose.connect(url)
-  .then(result => {
+  .then(() => {
     console.log('connected to MongoDB')
   })
   .catch(error => {
@@ -30,7 +30,7 @@ const phoneBookSchema = new mongoose.Schema({
 
 phoneBookSchema.set('toJSON', {
   transform: (document, returnedObject) => {
-    console.log("returnedObject ===>", returnedObject)
+    console.log('returnedObject ===>', returnedObject)
     returnedObject.id = returnedObject._id.toString()
     delete returnedObject._id
     delete returnedObject.__v

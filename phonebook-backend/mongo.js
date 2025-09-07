@@ -24,25 +24,25 @@ const phonebook = new PhoneBook({
 
 
 if (!password) {
-  console.log("Password is required")
+  console.log('Password is required')
   process.exit(1)
 }
 
 if (password && !name && !number) {
   PhoneBook.find({}).then(result => {
-    console.log("phonebook:")
+    console.log('phonebook:')
     result.forEach(x => console.log(`${x.name} ${x.number}`))
     mongoose.connection.close()
   })
 }
 else if (password && name && number) {
-  phonebook.save().then(result => {
+  phonebook.save().then(() => {
     console.log(`added ${name} number ${number} to phonebook`)
     mongoose.connection.close()
   })
 }
 else {
-  console.log("Please provide both name and number along with password")
+  console.log('Please provide both name and number along with password')
   process.exit(1)
 }
 

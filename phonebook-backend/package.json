@@ -6,6 +6,7 @@
     "start": "node index.js",
     "dev": "node --watch index.js",
     "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "eslint .",
     "build:ui": "powershell -Command \"Remove-Item -Recurse -Force dist; cd ../phonebook-frontend; npm run build; Copy-Item -Recurse dist ../phonebook-backend\"",
     "deploy:full": "npm run build:ui && git add . && git commit -m uibuild && git push"
   },
@@ -18,5 +19,11 @@
     "express": "^5.1.0",
     "mongoose": "^8.17.1",
     "morgan": "^1.10.1"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.35.0",
+    "@stylistic/eslint-plugin": "^5.3.1",
+    "eslint": "^9.35.0",
+    "globals": "^16.3.0"
   }
 }
